@@ -29,10 +29,41 @@ impl LinkedList{
             current = node.next.as_ref();
         }
     }
+    
+    pub fn push_front(&mut self, data: i32) {
+        let new_node = Box::new(Node{data, next: self.head.take()});
+        self.head = Some(new_node);
+    }
+    
+    pub fn pop_front(&mut self) {
+        if let Some(node) = self.head.take() {
+            self.head = node.next;
+        }
+    }
+    
+    pub fn pop_back(&mut self){ 
+        let mut current = &mut self.head;
+        
+        // going to end of linklist
+        while let Some(node) = current{
+            if node.next.is_some() && node.next.as_ref().unwrap().next.is_none() {
+                node.next = None;
+            }
+            current = &mut node.next;
+        }
+    }
 }
+
 fn main() {
     let mut link = LinkedList::new(10);
    link.push_back(20);
    link.push_back(30);
+   link.print();
+   link.push_front(100);
+   link.print();
+   link.pop_front();
+   println!("After pop front");
+   link.pop_back();
+   println!("After pop back");
    link.print();
 }

@@ -44,6 +44,14 @@ impl LinkedList{
     pub fn pop_back(&mut self){ 
         let mut current = &mut self.head;
         
+        if current.is_none(){
+            return;
+        }
+        
+        if current.as_ref().unwrap().next.is_none(){
+            *current = None;
+            return;
+        }
         // going to end of linklist
         while let Some(node) = current{
             if node.next.is_some() && node.next.as_ref().unwrap().next.is_none() {
@@ -63,6 +71,7 @@ fn main() {
    link.print();
    link.pop_front();
    println!("After pop front");
+   link.pop_back();
    link.pop_back();
    println!("After pop back");
    link.print();

@@ -1,3 +1,5 @@
+use std::io::Cursor;
+
 #[derive(Debug)]
 pub struct Node{
     pub data: i32,
@@ -60,19 +62,39 @@ impl LinkedList{
             current = &mut node.next;
         }
     }
+    
+    pub fn len(&mut self) -> usize{
+        let mut count = 0;
+        let mut current = &mut self.head;
+        if current.is_none(){
+            return count;
+        }
+        while let Some(node) = current{
+            count += 1;
+            current = &mut node.next;
+        }
+        count
+    }
 }
 
 fn main() {
     let mut link = LinkedList::new(10);
    link.push_back(20);
    link.push_back(30);
+   println!("len: {}", link.len());
    link.print();
    link.push_front(100);
+   println!("len: {}", link.len());
    link.print();
    link.pop_front();
+   println!("len: {}", link.len());
+
    println!("After pop front");
    link.pop_back();
    link.pop_back();
+   println!("len: {}", link.len());
    println!("After pop back");
+   link.pop_back();
+   println!("len: {}", link.len());
    link.print();
 }

@@ -1,6 +1,6 @@
 /target
 /__pycache__
-
+cargo.lock
 # Added by cargo
 #
 # already existing elements were commented out

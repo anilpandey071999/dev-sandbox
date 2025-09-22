@@ -1,14 +1,25 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+use std::{fs::{self, File}, io::Write};
+
+pub struct Logger {
+    pub log: String,
+    file: File,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+impl Logger {
+    pub fn new() -> Self {
+        let file = fs::OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open("./logs/1.log")
+            .expect("Failed to open file for appending");
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+        Self {
+            log: String::new(),
+            file,
+        }
+    }
+
+    pub fn append(&mut self, log: String) -> () {
+        self.file.write_all(log.as_bytes()).expect("failed to append log!!")
     }
 }

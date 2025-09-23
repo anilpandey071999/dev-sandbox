@@ -19,16 +19,11 @@ impl<T: Eq + Hash + Debug + Display + Clone, U: Debug + Display + Clone> KvStore
         }
     }
 
-    pub fn set(&mut self, key: T, value: U) -> bool {
-        self.kv_store.insert(key.clone(), value.clone());
-        true
+    pub fn set(&mut self, key: T, value: U) -> Option<U> {
+        self.kv_store.insert(key, value)
     }
 
     pub fn get(&self, key: &T) -> Option<&U> {
-        if let Some(value) = self.kv_store.get(key) {
-            Some(value)
-        } else {
-            None
-        }
+        self.kv_store.get(key)
     }
 }

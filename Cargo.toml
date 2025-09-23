@@ -12,3 +12,4 @@ kv = { path = "./crates/kv" }
 
 [dependencies]
 kv.workspace = true
+log.workspace = true

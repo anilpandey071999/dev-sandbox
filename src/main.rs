@@ -1,55 +1,50 @@
-use kv::KvStore;
+use kv::KvHandle;
 use log::Logger;
-use std::{
-    sync::{Arc, RwLock},
-    thread,
-};
+use std::thread;
 
 fn main() {
-    let kv_store = Arc::new(RwLock::new(KvStore::new()));
+    let kv_handle = KvHandle::new();
     let (tx, rx) = std::sync::mpsc::channel();
-    let mut logs = Logger::new(rx);
 
+    let mut logger = Logger::new(rx);
     let logger_thread = thread::spawn(move || {
-        logs.run();
+        logger.run();
     });
 
-    let kv_thread1 = kv_store.clone();
+    let kv_store_thread1 = kv_handle.store.clone();
     let tx_thread1 = tx.clone();
-    let thread1 = std::thread::spawn(move || {
-        for _ in 0..10 {
-            // let a = kv_thread1.get_mut().unwrap();
-            if let Err(send_log_err) =
-                tx_thread1.send(format!("key: {} value: {}", "key1", "value1"))
-            {
-                eprintln!("Error sending log: {}", send_log_err);
-            }
-            kv_thread1
-                .write()
-                .unwrap()
-                .set("key1".to_string(), "value1".to_string());
-            // kv_store.set("key1".to_string(), "value1".to_string());
-        }
-    });
 
-    let kv_thread2 = kv_store.clone();
+    let kv_store_thread2 = kv_handle.store.clone();
     let tx_thread2 = tx.clone();
-    let thread2 = std::thread::spawn(move || {
-        for _ in 0..10 {
-            if let Err(send_log_err) =
-                tx_thread2.send(format!("key: {} value: {}", "key2", "value2"))
-            {
-                eprintln!("Error sending log: {}", send_log_err);
-            }
-            kv_thread2
-                .write()
-                .unwrap()
-                .set("key2".to_string(), "value2".to_string());
+
+    let thread_handler1 = thread::spawn(move || {
+        for i in 0..10 {
+            let key = format!("Key{i}");
+            let value = format!("value{i}");
+            let _ = tx_thread1
+                .send(format!(
+                    "thread1 iter count {i} | Key : {key} Value: {value} "
+                ))
+                .unwrap();
+            kv_store_thread1.write().unwrap().set(key, value);
         }
     });
 
-    thread1.join().unwrap();
-    thread2.join().unwrap();
+    let thread_handler2 = thread::spawn(move || {
+        for i in 0..10 {
+            let key = format!("Key{i}");
+            let value = format!("value{i}");
+            let _ = tx_thread2
+                .send(format!(
+                    "thread2 iter count {i} | Key : {key} Value: {value} "
+                ))
+                .unwrap();
+            kv_store_thread2.write().unwrap().set(key, value);
+        }
+    });
+
+    thread_handler1.join().unwrap();
+    thread_handler2.join().unwrap();
 
     drop(tx);
 

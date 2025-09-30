@@ -31,7 +31,7 @@ fn main() {
     });
 
     let thread_handler2 = thread::spawn(move || {
-        for i in 0..10 {
+        for i in 0..1_000_000_000 {
             let key = format!("Key{i}");
             let value = format!("value{i}");
             let _ = tx_thread2
@@ -50,34 +50,45 @@ fn main() {
 
     logger_thread.join().unwrap();
 
-//     logger_thread.join().unwrap();
-
-//     println!("We have reached to end!!");
-// }
-
-fn main(){
-    let count = std::sync::Arc::new(std::sync::RwLock::new(0));
-    let falge = std::sync::Arc::new(std::sync::RwLock::new(true));
-    
-    let thread_count1 = count.clone();
-    let thread_flage1 = falge.clone();
-    
-    let thread_count2 = count.clone();
-    let thread_flage2 = falge.clone();
-    
-    let thread1 = thread::spawn(move ||{
-        for _ in 0..10{
-            *thread_count1.write().unwrap() += 1;
-        } 
-        println!("Thread count from  {}", thread_count1.read().unwrap());
-    });
-    let thread2 = thread::spawn(move ||{
-        for _ in 0..10{
-            *thread_count2.write().unwrap() -= 1;
-        } 
-    });
-    
-    thread1.join().unwrap();
-    thread2.join().unwrap();
-    println!("Thread count {}", count.read().unwrap());
+    println!("We have reached to end!!");
 }
+
+// fn main(){
+//     let count_rwlock = std::sync::Arc::new(std::sync::RwLock::new(0));
+//     let falge_rwlock = std::sync::Arc::new(std::sync::RwLock::new(true));
+    
+//     let thread_count1_rwlock = count_rwlock.clone();
+//     let thread_flage1_rwlock = falge_rwlock.clone();
+    
+//     let thread_count2_rwlock = count_rwlock.clone();
+//     let thread_flage2_rwlock = falge_rwlock.clone();
+    
+//     let thread1 = thread::spawn(move ||{
+//         *thread_flage1_rwlock.write().unwrap() = false;
+//         for i in 0..1_00_00_000_00{
+//             *thread_count1_rwlock.write().unwrap() += 1;
+//             // println!("thread1 increamenting {i}");
+//         } 
+//         *thread_flage1_rwlock.write().unwrap() = true;
+//         println!("Thread count thread 1 {}", thread_count1_rwlock.read().unwrap());
+//     });
+    
+    
+//     let thread2 = thread::spawn(move ||{
+//         let mut count = 0;
+//         while !*thread_flage2_rwlock.read().unwrap(){
+//             count += 1;
+//             println!("xxxxxxxxxxxxxxxxxxx count {count} decreamenting is waiting!!xxxxxxxxxxxxxxxxxxx");
+//         }
+//         for i in 0..1_00_00_000_00{
+//             // println!("thread2 decreamenting {i}");
+//             *thread_count2_rwlock.write().unwrap() -= 1;
+//         } 
+//     });
+//     thread1.join().unwrap();
+//     thread2.join().unwrap();
+    
+    
+    
+//     println!("Thread count {}", count_rwlock.read().unwrap());
+// }

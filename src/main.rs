@@ -50,5 +50,34 @@ fn main() {
 
     logger_thread.join().unwrap();
 
-    println!("We have reached to end!!");
+//     logger_thread.join().unwrap();
+
+//     println!("We have reached to end!!");
+// }
+
+fn main(){
+    let count = std::sync::Arc::new(std::sync::RwLock::new(0));
+    let falge = std::sync::Arc::new(std::sync::RwLock::new(true));
+    
+    let thread_count1 = count.clone();
+    let thread_flage1 = falge.clone();
+    
+    let thread_count2 = count.clone();
+    let thread_flage2 = falge.clone();
+    
+    let thread1 = thread::spawn(move ||{
+        for _ in 0..10{
+            *thread_count1.write().unwrap() += 1;
+        } 
+        println!("Thread count from  {}", thread_count1.read().unwrap());
+    });
+    let thread2 = thread::spawn(move ||{
+        for _ in 0..10{
+            *thread_count2.write().unwrap() -= 1;
+        } 
+    });
+    
+    thread1.join().unwrap();
+    thread2.join().unwrap();
+    println!("Thread count {}", count.read().unwrap());
 }

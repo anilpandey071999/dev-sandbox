@@ -16,14 +16,15 @@ fn main() {
 
     let kv_store_thread2 = kv_handle.store.clone();
     let tx_thread2 = tx.clone();
+    
 
     let thread_handler1 = thread::spawn(move || {
-        for i in 0..10 {
+        for i in 0..1_000_000 {
             let key = format!("Key{i}");
             let value = format!("value{i}");
             let _ = tx_thread1
                 .send(format!(
-                    "thread1 iter count {i} | Key : {key} Value: {value} "
+                    "thread1 iter count {i} | Key : {key} Value: {value} \n"
                 ))
                 .unwrap();
             kv_store_thread1.write().unwrap().set(key, value);
@@ -31,12 +32,12 @@ fn main() {
     });
 
     let thread_handler2 = thread::spawn(move || {
-        for i in 0..1_000_000_000 {
+        for i in 1_00_000..2_000_000 {
             let key = format!("Key{i}");
             let value = format!("value{i}");
             let _ = tx_thread2
                 .send(format!(
-                    "thread2 iter count {i} | Key : {key} Value: {value} "
+                    "thread2 iter count {i} | Key : {key} Value: {value} \n"
                 ))
                 .unwrap();
             kv_store_thread2.write().unwrap().set(key, value);

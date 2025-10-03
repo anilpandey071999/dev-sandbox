@@ -3,7 +3,9 @@ use std::{
     io::{BufWriter, Write},
     sync::mpsc::Receiver,
 };
-
+/*
+ * `buffer writer` first keep every log in the memory buffer before writing to file this will make few system call
+ */
 pub struct Logger {
     rx: Receiver<String>,
     buf_file_writer: BufWriter<File>,
@@ -32,7 +34,7 @@ impl Logger {
             rx,
             buf_file_writer: buf_write,
             current_size: 0,
-            max_size: 1_000_000_000,
+            max_size: 1_000_000_00,
         }
     }
 
@@ -40,6 +42,7 @@ impl Logger {
         let bytes_message = log.as_bytes();
 
         if self.current_size >= self.max_size {
+            self.current_size = 0;
             let file_path = format!("./logs/{}.log", chrono::Utc::now());
             let file = fs::OpenOptions::new()
                 .append(true)

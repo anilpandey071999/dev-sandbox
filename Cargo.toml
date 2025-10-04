@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [workspace]
-members = ["crates/kv", "crates/log", "crates/tests"]
+members = ["crates/kv", "crates/log"]
 
 [workspace.dependencies]
 log = { path = "./crates/log" }
@@ -12,5 +12,6 @@ kv = { path = "./crates/kv" }
 chrono = "0.4.42"
 
 [dependencies]
+chrono.workspace = true
 kv.workspace = true
 log.workspace = true

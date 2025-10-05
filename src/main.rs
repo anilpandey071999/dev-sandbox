@@ -1,6 +1,5 @@
 use kv::KvHandle;
 use log::{Logger, info};
-use std::io::BufWriter;
 use std::thread;
 
 fn main() {
@@ -22,7 +21,7 @@ fn main() {
 
     let thread_handler1 = thread::spawn(move || {
         // for i in 0..1_000_000 {
-        for i in 0..10 {
+        for i in 0..1_000 {
             let key = format!("Key{i}");
             let value = format!("value{i}");
             let _ = tx_thread1
@@ -36,15 +35,18 @@ fn main() {
 
     let thread_handler2 = thread::spawn(move || {
         // for i in 1_00_000..2_000_000 {
-        for i in 10..20 {
+        for i in 1_001..2_000 {
             let key = format!("Key{i}");
             let value = format!("value{i}");
 
-            let _ = tx_thread2
-                .send(format!(
-                    "thread2 iter count {i} | Key : {key} Value: {value} \n"
-                ))
-                .unwrap();
+            // let _ = tx_thread2
+            //     .send(format!(
+            //         "thread2 iter count {i} | Key : {key} Value: {value} \n"
+            //     ))
+            //     .unwrap();
+            info!(format!(
+                "thread2 iter count {i} | Key : {key} Value: {value} \n"
+            ));
             kv_store_thread2.write().unwrap().set(key, value);
         }
     });

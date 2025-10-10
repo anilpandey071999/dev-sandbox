@@ -2,7 +2,7 @@ use chrono::Utc;
 use lazy_static::lazy_static;
 use std::{
     fs::{self, File},
-    io::{BufWriter, Write},
+    io::BufWriter,
     sync::{RwLock, mpsc::Receiver},
 };
 

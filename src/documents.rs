@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use crate::search_engine::SearchEngine;
 
 pub struct Document<'a> {
     pub title: &'a str,
@@ -15,8 +15,10 @@ impl<'a> Documents<'a> {
         Self { docs: Vec::new() }
     }
 
-    pub fn insert_documents(&mut self, title: &'a str, contents: &'a str) {
+    pub fn insert_documents(&mut self, title: &'a str, contents: &'a str, hash: &mut SearchEngine) {
         let document = Document { title, contents };
+        let a = self.docs.len();
+        hash.insert_hashmap(title.to_string(), a);
         self.docs.push(document);
     }
 

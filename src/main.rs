@@ -1,4 +1,7 @@
-use crate::documents::{Document, Documents};
+use crate::{
+    documents::{Document, Documents},
+    search_engine::SearchEngine,
+};
 
 pub mod documents;
 pub mod search_engine;
@@ -89,9 +92,12 @@ fn main() {
     ];
 
     println!("len of recodes :{}", records.len());
-
-    for doc in records {
-        documents.insert_documents(doc.title, doc.contents);
+    let mut search_engine = SearchEngine::new();
+    for (i, doc) in records.iter().enumerate() {
+        documents.insert_documents(doc.title, doc.contents, &mut search_engine);
+        if i == 10 {
+            println!("{:?}", search_engine.search);
+        }
     }
 
     if let Err(err) = documents.delete_documents(20) {

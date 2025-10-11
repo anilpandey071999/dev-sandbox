@@ -91,6 +91,20 @@ fn main() {
         },
     ];
 
+    // let records = vec![
+    //     Document {
+    //         title: "Introduction to Rust",
+    //         contents: "Rust is a systems programming language focused on safety, speed, and concurrency. It achieves memory safety without garbage collection.",
+    //     },
+    //     Document {
+    //         title: "Understanding Ownership",
+    //         contents: "Ownership is Rust's most unique feature. Each value has a variable that's called its owner. There can only be one owner at a time.",
+    //     },
+    //     Document {
+    //         title: "Vector Data Structures Rust",
+    //         contents: "Vectors are resizable arrays stored on the heap. They can grow or shrink in size and are one of the most commonly used collection types.",
+    //     },
+    // ];
     println!("len of recodes :{}", records.len());
     let mut search_engine = SearchEngine::new();
     for (i, doc) in records.iter().enumerate() {

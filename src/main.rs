@@ -1,3 +1,5 @@
+// use std::io::{self, Write, stdin, stdout};
+
 use crate::{
     documents::{Document, Documents},
     search_engine::SearchEngine,
@@ -107,16 +109,91 @@ fn main() {
     // ];
     println!("len of recodes :{}", records.len());
     let mut search_engine = SearchEngine::new();
-    for (i, doc) in records.iter().enumerate() {
+    for (_i, doc) in records.iter().enumerate() {
         documents.insert_documents(doc.title, doc.contents, &mut search_engine);
-        if i == 10 {
-            println!("{:?}", search_engine.search);
-        }
+        // if i == 10 {
+        //     println!("{:?}", search_engine.search);
+        // }
     }
 
-    if let Err(err) = documents.delete_documents(20) {
-        println!("{err}");
-    }
+    // if let Err(err) = documents.delete_documents(19) {
+    //     println!("{err}");
+    // }
 
-    println!("{}", documents.docs.len())
+    // println!("{}", documents.docs.l
+    // en());
+
+    let serach_key = "and";
+
+    println!("{:?}", search_engine.search.get(serach_key));
+
+    match documents.search_key(serach_key, &search_engine) {
+        Ok(val) => val
+            .iter()
+            .for_each(|val| println!("title: {}\n contect: {}", val.title, val.contents)),
+        Err(err) => eprintln!("{}", err),
+    }
+    // get_user_input()
 }
+
+// fn get_user_input() {
+//     let mut documents = Documents::new();
+//     let mut hash = SearchEngine::new();
+//     loop {
+//         print!(
+//             "> Choose the option \n> 1 for adding document \n> 2 for searching \n> 3 for seen all the documents \n> 4 for exiting \n>"
+//         );
+//         stdout().flush().unwrap();
+
+//         let mut choose = String::new();
+//         stdin().read_line(&mut choose).unwrap();
+//         // if choose.contains("exits") {
+//         //     break;
+//         // }
+//         let mut title = String::new();
+//         let mut content = String::new();
+//         let choose = choose.trim().parse::<i32>().unwrap();
+//         match choose {
+//             1 => adding_document(&mut documents, &mut hash, &mut title, &mut content).unwrap(),
+//             2 => searching_doc(&mut documents, &mut hash),
+//             // 3 =>
+//             _ => println!("invalied choose"),
+//         }
+//     }
+// }
+
+// fn adding_document<'a>(
+//     documents: &'a mut Documents<'a>,
+//     hash: &'a mut SearchEngine<'a>,
+//     title: &'a mut String,
+//     content: &'a mut String,
+// ) -> Result<(), String> {
+//     println!("> Enter the title (or 'exit' to quit): ");
+//     stdout().flush().unwrap();
+
+//     stdin().read_line(title).unwrap();
+//     let title = title.trim().to_string();
+
+//     if title.eq_ignore_ascii_case("exit") {
+//         println!("> Exiting...");
+//         return Err("Exiting...".to_string());
+//     }
+
+//     println!("Enter document content: ");
+//     stdout().flush().unwrap();
+
+//     stdin().read_line(content).unwrap();
+//     let content = content.trim().to_string();
+
+//     documents.insert_documents(title.as_str(), content.as_str(), hash);
+
+//     Ok(())
+// }
+
+// fn searching_doc(documents: &mut Documents, hash: &mut SearchEngine) {
+//     println!("yet to be implemented...");
+// }
+
+// fn viewing_docs() {
+//     println!("{:?}", )
+// }

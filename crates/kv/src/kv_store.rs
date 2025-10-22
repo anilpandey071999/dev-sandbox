@@ -12,7 +12,7 @@ pub struct KvStore<T: Eq + Hash + Debug + Display, U: Debug + Display> {
     pub kv_store: HashMap<T, U>,
 }
 
-impl<T: Eq + Hash + Debug + Display , U: Debug + Display > KvStore<T, U> {
+impl<T: Eq + Hash + Debug + Display, U: Debug + Display> KvStore<T, U> {
     pub fn new() -> Self {
         Self {
             kv_store: HashMap::new(),

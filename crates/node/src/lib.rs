@@ -1,9 +1,26 @@
-use std::collections::HashMap;
-use raft::prelude::*;
+pub struct Node {
+    pub id: String,
+    pub leader_address: Option<String>,
+    pub follower_address: Vec<String>,
+    pub log_checksum: String,
+}
 
-#[tokio::main]
-async fn start_node() {
-    let config = Config { id: 1, ..Default::default() } ;
-    // let store
-    // raft::RawNode::new(&config, store, logger)
+impl Node {
+    pub fn new(is_leader: bool, leader_address: String) -> Self {
+        let id: String = uuid::Uuid::new_v4().into();
+        if is_leader {
+            return Self {
+                id,
+                leader_address: Some(leader_address),
+                follower_address: Vec::new(),
+                log_checksum: String::new(),
+            };
+        }
+        Self {
+            id,
+            leader_address: None,
+            follower_address: Vec::new(),
+            log_checksum: String::new(),
+        }
+    }
 }

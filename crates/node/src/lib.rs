@@ -23,4 +23,16 @@ impl Node {
             log_checksum: String::new(),
         }
     }
+
+    pub async fn run(&self){
+        if let Some(address) = &self.leader_address{
+
+        }
+
+        loop {
+            // tokio::select! {
+
+            // }
+        }
+    }
 }

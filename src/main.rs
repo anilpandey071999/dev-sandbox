@@ -1,16 +1,20 @@
-// use kv::KvHandle;
-// use log::Logger;
-// use std::thread;
-// use node;
+use std::env;
 use tokio::runtime::Runtime;
-
 fn main() {
     let rt = Runtime::new().expect("Failed to create runtime!!");
 
     rt.block_on(async {
-        // node::Node::<String, String>::start_node().await;
+        let is_leader = env::var("ISLEADER")
+            .expect("ISLEADER does not found!!")
+            .parse::<bool>()
+            .unwrap();
+        let leader_address = env::var("LEADER_ADDRESS").expect("LEADER_ADDRESS does not found!!");
+        let _port = env::var("PORT").expect("PORT does not found!!");
+
+        let node = node::Node::new(is_leader, leader_address);
+
+        
     });
-    // start_node()
 }
 // fn main() {
 //     let kv_handle = KvHandle::new();

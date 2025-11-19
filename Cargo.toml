@@ -3,24 +3,6 @@ name = "dev-sandbox"
 version = "0.1.0"
 edition = "2024"
 
-[workspace]
-members = ["crates/kv", "crates/log", "crates/node"]
-
 [workspace.dependencies]
-log = { path = "./crates/log" }
-kv = { path = "./crates/kv" }
-node = { path = "./crates/node" }
-chrono = "0.4.42"
-lazy_static = "1.5.0"
-raft = "0.7.0"
 
 [dependencies]
-chrono.workspace = true
-kv.workspace = true
-log.workspace = true
-lazy_static.workspace = true
-raft.workspace = true
-node.workspace = true
-tokio = { version = "1.48.0", features = ["full"] }
-slog = "2.8.2"
-slog-stdlog = "4.1.1"

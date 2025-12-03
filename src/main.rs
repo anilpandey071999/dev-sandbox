@@ -1,11 +1,14 @@
 use std::cell::RefCell;
+use std::cell::UnsafeCell;
+use std::collections::HashMap;
 use std::future::Future;
 use std::sync::LazyLock;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use tokio::runtime::{Builder, Runtime};
 use tokio::task::JoinHandle;
 
+use tokio::time;
 use tokio_util::task::LocalPoolHandle;
 
 /// ### High Priority task will served!!
@@ -29,16 +32,33 @@ static LOW_PRIORITY: LazyLock<Runtime> = LazyLock::new(|| {
 });
 
 thread_local! {
-    pub static COUNTER: RefCell<u32> = RefCell::new(1);
+    pub static COUNTER: UnsafeCell<HashMap<u32, u32>> = UnsafeCell::new(HashMap::new());
 }
 
 async fn something(number: u32) -> u32 {
-    std::thread::sleep(std::time::Duration::from_secs(3));
+    tokio::time::sleep(std::time::Duration::from_secs(3)).await;
     COUNTER.with(|counter| {
-        *counter.borrow_mut() += 1;
-        println!("Counter: {} for: {}", *counter.borrow(), number)
+        let counter = unsafe { &mut *counter.get() };
+        match counter.get_mut(&number) {
+            Some(count) => {
+                let placeholder = *count + 1;
+                *count = placeholder;
+            }
+            None => {
+                counter.insert(number, 1);
+            }
+        }
+        // *counter.borrow_mut() += 1;
+        // println!("Counter: {} for: {}", *counter.borrow(), number)
     });
     number
+}
+
+async fn print_statement() {
+    COUNTER.with(|counter| {
+        let counter = unsafe { &mut *counter.get() };
+        println!("counter: {:?}", counter);
+    });
 }
 
 static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
@@ -85,25 +105,26 @@ fn _coustom_tokio_main() {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
+    let start = std::time::SystemTime::now();
+    println!("Start Time: {:#?}", start);
     let pool = LocalPoolHandle::new(3);
-    let one = pool.spawn_pinned_by_idx(|| async {
-        println!("one");
-        something(1).await
-    }, 0);
-    let two = pool.spawn_pinned_by_idx(|| async {
-        println!("two");
-        something(2).await
-    }, 0);
-    let three = pool.spawn_pinned_by_idx(|| async {
-        println!("three");
-        something(3).await
-    }, 0);
+    let sequence = [1, 2, 3, 4, 5];
+    let repeated_sequence: Vec<_> = sequence.iter().cycle().take(5000).cloned().collect();
+    let mut futures = Vec::new();
+    for number in repeated_sequence {
+        futures.push(pool.spawn_pinned(move || async move {
+            something(number).await;
+            something(number).await
+        }));
+    }
 
-    let result = async {
-        let one = one.await.unwrap();
-        let two = two.await.unwrap();
-        let three = three.await.unwrap();
-        one + two + three
-    };
-    println!("result: {}", result.await);
+    for i in futures {
+        let _ = i.await.unwrap();
+    }
+    let _ = pool
+        .spawn_pinned(|| async { print_statement().await })
+        .await
+        .unwrap();
+    let end = std::time::SystemTime::now();
+    println!("end Time: {:#?} And Dureation: {:#?}", end, end.duration_since(start).unwrap());
 }

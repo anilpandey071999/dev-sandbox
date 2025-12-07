@@ -1,16 +1,19 @@
+#[allow(warnings)]
 use std::cell::RefCell;
 use std::cell::UnsafeCell;
 use std::collections::HashMap;
 use std::future::Future;
 use std::sync::LazyLock;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use tokio::runtime::{Builder, Runtime};
 use tokio::task::JoinHandle;
 
+#[allow(warnings)]
 use tokio::time;
 use tokio_util::task::LocalPoolHandle;
 
+#[allow(warnings)]
 /// ### High Priority task will served!!
 static HIGH_PRIORITY: LazyLock<Runtime> = LazyLock::new(|| {
     Builder::new_multi_thread()
@@ -20,7 +23,7 @@ static HIGH_PRIORITY: LazyLock<Runtime> = LazyLock::new(|| {
         .build()
         .unwrap()
 });
-
+#[allow(warnings)]
 /// Low Priority task will served!!
 static LOW_PRIORITY: LazyLock<Runtime> = LazyLock::new(|| {
     Builder::new_multi_thread()
@@ -85,7 +88,7 @@ where
 {
     RUNTIME.spawn(future)
 }
-
+#[allow(warnings)]
 async fn sleep_example() -> i32 {
     println!("Sleeping for 2 Seconds");
     tokio::time::sleep(Duration::from_secs(2)).await;
@@ -105,26 +108,64 @@ fn _coustom_tokio_main() {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
-    let start = std::time::SystemTime::now();
-    println!("Start Time: {:#?}", start);
-    let pool = LocalPoolHandle::new(3);
-    let sequence = [1, 2, 3, 4, 5];
-    let repeated_sequence: Vec<_> = sequence.iter().cycle().take(5000).cloned().collect();
-    let mut futures = Vec::new();
-    for number in repeated_sequence {
-        futures.push(pool.spawn_pinned(move || async move {
-            something(number).await;
-            something(number).await
-        }));
-    }
+    std::thread::spawn(|| {
+        let runtime = tokio::runtime::Builder::new_multi_thread()
+            .enable_all()
+            .build()
+            .unwrap();
 
-    for i in futures {
-        let _ = i.await.unwrap();
+        runtime.block_on(async {
+            println!("Hello, world!");
+        });
+    });
+    let mut count = 0;
+    loop {
+        tokio::signal::ctrl_c().await.unwrap();
+        println!("ctrl-c received!");
+        count += 1;
+        if count > 2 {
+            std::process::exit(0);
+        }
     }
-    let _ = pool
-        .spawn_pinned(|| async { print_statement().await })
-        .await
-        .unwrap();
-    let end = std::time::SystemTime::now();
-    println!("end Time: {:#?} And Dureation: {:#?}", end, end.duration_since(start).unwrap());
+    // tokio::spawn(cleanup());
+    // let start = std::time::SystemTime::now();
+    // println!("Start Time: {:#?}", start);
+    // let pool = LocalPoolHandle::new(3);
+    // let sequence = [1, 2, 3, 4, 5];
+    // let repeated_sequence: Vec<_> = sequence.iter().cycle().take(5000).cloned().collect();
+    // let mut futures = Vec::new();
+    // for number in repeated_sequence {
+    //     futures.push(pool.spawn_pinned(move || async move {
+    //         something(number).await;
+    //         something(number).await
+    //     }));
+    // }
+
+    // for i in futures {
+    //     let _ = i.await.unwrap();
+    // }
+    // let _ = pool
+    //     .spawn_pinned(|| async { print_statement().await })
+    //     .await
+    //     .unwrap();
+    // let end = std::time::SystemTime::now();
+    // println!(
+    //     "end Time: {:#?} And Dureation: {:#?}",
+    //     end,
+    //     end.duration_since(start).unwrap()
+    // );
+}
+
+async fn cleanup() {
+    println!("Cleanup background task started!!");
+    let mut count = 0;
+    loop {
+        std::thread::sleep(std::time::Duration::from_secs(5));
+        tokio::signal::ctrl_c().await.unwrap();
+        println!("ctrl-c received!");
+        count += 1;
+        if count > 2 {
+            std::process::exit(0);
+        }
+    }
 }

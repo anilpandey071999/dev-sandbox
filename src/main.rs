@@ -5,7 +5,8 @@ use std::collections::HashMap;
 use std::sync::LazyLock;
 
 use tokio::runtime::{Builder, Runtime};
-use tokio::signal::unix::{Signal, SignalKind};
+use tokio::signal;
+use tokio::signal::unix::{Signal, SignalKind, signal};
 
 #[allow(warnings)]
 use tokio::time;
@@ -107,6 +108,10 @@ async fn main() {
     });
     tokio::signal::ctrl_c().await.unwrap();
     println!("ctrl-c received!");
+    let pid = std::process::id();
+    println!("Process Id: {}", pid);
+    let mut strem = signal(SignalKind::hangup()).unwrap();
+    strem.recv().await;
     let complete_counter = get_complete_count().await;
     println!("Complete counter: {:?}", complete_counter);
 }

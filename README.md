@@ -11,6 +11,7 @@ This repository uses Git branches to organize different learning topics and proj
 |----------------|-------------------------------------|
 | main           | This README and overview             |
 | linked-list    | Linked list implementation in Rust  |
+| rust keydb     | Key-value database in Rust          |
 
 ---
 

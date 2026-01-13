@@ -1,9 +1,77 @@
 use std::{collections::HashMap, sync::OnceLock};
+use tokio::fs::File;
+use tokio::io::{self, AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 use tokio::sync::{
     mpsc::channel,
     mpsc::{Receiver, Sender},
     oneshot,
 };
+
+enum WriterLogMessage {
+    Set(String, Vec<u8>),
+    Get(oneshot::Sender<HashMap<String, Vec<u8>>>),
+    Delete(String),
+}
+
+impl WriterLogMessage {
+    fn from_key_value_message(message: &KeyValueMessage) -> Option<WriterLogMessage> {
+        match message {
+            KeyValueMessage::Get(_) => None,
+            KeyValueMessage::Set(message) => Some(WriterLogMessage::Set(
+                message.key.clone(),
+                message.value.clone(),
+            )),
+            KeyValueMessage::Delete(message) => Some(WriterLogMessage::Delete(message.key.clone())),
+        }
+    }
+}
+
+async fn read_data_from_file(file_path: &str) -> io::Result<HashMap<String, Vec<u8>>> {
+    let mut file = File::open(file_path).await?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).await?;
+    let data: HashMap<String, Vec<u8>> = serde_json::from_str(&contents)?;
+    Ok(data)
+}
+
+async fn load_data(file_path: &str) -> HashMap<String, Vec<u8>> {
+    match read_data_from_file(file_path).await {
+        Ok(data) => {
+            println!("Data Loaded from file: {:?}", data);
+            return data;
+        }
+        Err(err) => {
+            eprintln!("failed to load data from file: {err}");
+            println!("String with empty HashMap");
+            return HashMap::new();
+        }
+    }
+}
+
+async fn wite_actor(mut reciver: Receiver<WriterLogMessage>) -> io::Result<()> {
+    let mut map = load_data("./data.json").await;
+    let mut file = File::create("./data.json").await?;
+
+    while let Some(message) = reciver.recv().await {
+        match message {
+            WriterLogMessage::Set(key, value) => {
+                map.insert(key, value);
+            }
+            WriterLogMessage::Get(response) => {
+                let _ = response.send(map.clone());
+            }
+            WriterLogMessage::Delete(key) => {
+                map.remove(&key);
+            }
+        }
+        let contents = serde_json::to_string(&map).unwrap();
+        file.set_len(0).await?;
+        file.seek(std::io::SeekFrom::Start(0)).await?;
+        file.write_all(contents.as_bytes()).await?;
+        file.flush().await?
+    }
+    Ok(())
+}
 
 struct SetKeyValueMessage {
     key: String,
@@ -31,7 +99,17 @@ enum RoutingMessage {
 /// the main operation of the key-value actor
 async fn key_value_actor(mut receiver: Receiver<KeyValueMessage>) {
     let mut map: HashMap<String, Vec<u8>> = std::collections::HashMap::new();
+    let (writer_key_value_sender, writer_key_value_receiver) = channel(32);
+    tokio::spawn(wite_actor(writer_key_value_receiver));
+    let (get_sender, get_receiver) = oneshot::channel();
+    let _ = writer_key_value_sender
+        .send(WriterLogMessage::Get(get_sender))
+        .await;
+    let mut map = get_receiver.await.unwrap();
     while let Some(message) = receiver.recv().await {
+        if let Some(write_message) = WriterLogMessage::from_key_value_message(&message) {
+            let _ = writer_key_value_sender.send(write_message).await;
+        }
         match message {
             KeyValueMessage::Get(GetKeyValueMessage { key, response }) => {
                 let _ = response.send(map.get(&key).cloned());

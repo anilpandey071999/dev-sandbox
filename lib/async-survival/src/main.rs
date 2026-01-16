@@ -1,8 +1,5 @@
-use std::collections::HashMap;
-
 use tokio::sync::{mpsc, oneshot};
 
-// #[derive(PartialEq)]
 pub enum Command {
     Set {
         key: String,
@@ -20,7 +17,7 @@ pub enum Command {
     Shutdown,
 }
 
-async fn work(mut rx: mpsc::Receiver<Command>) {
+async fn worker(mut rx: mpsc::Receiver<Command>) {
     // println!("working");
     let mut global_state: HashMap<String, String> = HashMap::new();
     while let Some(command_ops) = rx.recv().await {
@@ -49,15 +46,8 @@ async fn work(mut rx: mpsc::Receiver<Command>) {
 async fn main() {
     let (tx, rx) = mpsc::channel(32);
 
-    tokio::spawn(work(rx));
+    tokio::spawn(worker(rx));
 
-    // tx.send(Command::Set {
-    //     key: "anil".to_string(),
-    //     value: "pandey".to_string(),
-    //     resp: resp_tx,
-    // })
-    // .await
-    // .unwrap();
     let mut handlers = Vec::new();
     for i in 0..100 {
         let local_tx = tx.clone();

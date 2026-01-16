@@ -4,3 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+warm_up = {path = "./lib/warm_up"}
+
+[workspace]
+member = [
+    "warm_up"
+]

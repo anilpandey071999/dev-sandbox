@@ -5,10 +5,3 @@ version = 4
 [[package]]
 name = "dev-sandbox"
 version = "0.1.0"
-dependencies = [
- "warm_up",
-]
-
-[[package]]
-name = "warm_up"
-version = "0.1.0"
